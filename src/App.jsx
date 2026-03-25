@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-export default function AuthDemo() {
+export default function App() {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [token, setToken] = useState(null);
