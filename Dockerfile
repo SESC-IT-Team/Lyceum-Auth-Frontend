@@ -8,18 +8,15 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# 2. nginx для отдачи статики
-FROM nginx:alpine
 
-# удаляем дефолтный конфиг
-RUN rm -rf /usr/share/nginx/html/*
+FROM node:20-alpine
 
-# копируем билд
-COPY --from=builder /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-# копируем конфиг nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+RUN npm install -g serve
 
-EXPOSE 80
+COPY --from=builder /app/dist ./dist
 
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 3000
+
+CMD ["serve", "-s", "dist", "-l", "3000"]

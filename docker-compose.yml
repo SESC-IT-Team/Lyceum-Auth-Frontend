@@ -1,8 +1,27 @@
-version: '3.9'
+version: "3.9"
 
 services:
   frontend:
     build: .
-    ports:
-      - "3000:80"
-    restart: unless-stopped
+    container_name: frontend
+    restart: always
+
+    networks:
+      - traefik-public
+
+    labels:
+      - "traefik.enable=true"
+
+
+      - "traefik.http.routers.frontend.rule=Host(`sesc-it-team.ru`)"
+
+
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+
+      # порт приложения
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+
+networks:
+  traefik-public:
+    external: true
