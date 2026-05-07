@@ -13,7 +13,7 @@ services:
       - "traefik.enable=true"
 
 
-      - "traefik.http.routers.frontend.rule=Host(`sesc-it-team.ru`)"
+      - "traefik.http.routers.frontend.rule=Host(`sesc-it-team.ru/auth`)"
 
 
       - "traefik.http.routers.frontend.entrypoints=websecure"
