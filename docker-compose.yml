@@ -12,15 +12,19 @@ services:
     labels:
       - "traefik.enable=true"
 
+      # роут
+      - "traefik.http.routers.frontend.rule=Host(`sesc-it-team.ru`) && PathPrefix(`/auth`)"
 
-      - "traefik.http.routers.frontend.rule=Host(`sesc-it-team.ru/auth`)"
-
-
+      # https
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
 
-      # порт приложения
+      # внутренний порт контейнера
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+
+      # убираем /auth перед отправкой в контейнер
+      - "traefik.http.middlewares.frontend-strip.stripprefix.prefixes=/auth"
+      - "traefik.http.routers.frontend.middlewares=frontend-strip"
 
 networks:
   traefik-public:
