@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-export default function App() {
+
+const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL;
+
+export default function Auth() {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [token, setToken] = useState(null);
+  const [redirectFrom, setRedirectFrom] = useState(null);
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -11,9 +15,24 @@ export default function App() {
   const isFormValid = login.trim() && password.trim();
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const fromParam = params.get("from");
+    if (fromParam) {
+      setRedirectFrom(fromParam);
+    }
+
     const savedToken = Cookies.get("accessToken");
     if (savedToken) {
       setToken(savedToken);
+      if (fromParam) {
+        try {
+          const url = decodeURIComponent(fromParam);
+          window.location.replace(url);
+          return;
+        } catch (e) {
+          console.warn("Invalid redirect URL in 'from' param", e);
+        }
+      }
     }
   }, []);
 
@@ -24,12 +43,14 @@ export default function App() {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await fetch("http://212.113.98.188:8000/api/v1/auth/me", {
-          method:"GET",
+        const authToken = token || Cookies.get("accessToken");
+        const res = await fetch(`${AUTH_API_URL}/api/v1/auth/me`, {
+          method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${authToken}`,
             "Content-Type": "application/json",
           },
+          credentials: "include",
         });
 
         if (!res.ok) throw new Error("Ошибка получения данных");
@@ -53,8 +74,9 @@ export default function App() {
     setError(null);
 
     try {
-      const res = await fetch("http://212.113.98.188:8000/api/v1/auth/login", {
+      const res = await fetch(`${AUTH_API_URL}/api/v1/auth/login`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -66,8 +88,22 @@ export default function App() {
       const data = await res.json();
       const receivedToken = data.access_token;
 
-      Cookies.set("accessToken", data.access_token, {expires: 7, secure: true, sameSite: "Strict"});
+      Cookies.set("accessToken", data.access_token, {
+        expires: 7,
+        secure: true,
+        sameSite: "None",
+        path: "/",
+      });
       setToken(receivedToken);
+      if (redirectFrom) {
+        try {
+          const url = decodeURIComponent(redirectFrom);
+          window.location.replace(url);
+          return;
+        } catch (e) {
+          console.warn("Invalid redirect URL in 'from' param", e);
+        }
+      }
     } catch (e) {
       setError(e.message);
     } finally {
@@ -76,7 +112,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    Cookies.remove("accessToken");
+    Cookies.remove("accessToken", { path: "/" });
     setToken(null);
     setUserData(null);
   };
