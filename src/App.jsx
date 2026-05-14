@@ -56,7 +56,6 @@ export default function Auth() {
         if (!res.ok) throw new Error("Ошибка получения данных");
 
         const data = await res.json();
-        console.log(data)
         setUserData(data);
       } catch (e) {
         setError(e.message);
@@ -83,7 +82,10 @@ export default function Auth() {
         body: JSON.stringify({ login, password }),
       });
 
-      if (!res.ok) throw new Error("Ошибка авторизации");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail == "Invalid login or password" ? "Неверный логин или пароль" : errorData.detail || "Неизвестная ошибка");
+      }
 
       const data = await res.json();
       const receivedToken = data.access_token;
@@ -118,69 +120,43 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center">
-      {!token ? (
-        <div className="min-h-screen flex justify-center items-center p-[10px_150px]">
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col gap-2.5 items-center h-75 w-100 border-2 border-gray-300 rounded-[30px] p-5"
-          >
-            <h1 className="pb-2.5 my-2.5 text-2xl font-bold">
-              Вход в учетную запись
-            </h1>
-
-            <input
-              type="text"
-              placeholder="Логин"
-              value={login}
-              onChange={(e) => setLogin(e.target.value)}
-              disabled={isLoading}
-              className="rounded-[15px] h-8.75 pl-1.5 w-[90%] border border-gray-300 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 disabled:bg-gray-100"
-            />
-
-            <input
-              type="password"
-              placeholder="Пароль"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-              className="rounded-[15px] h-8.75 pl-1.5 w-[90%] border border-gray-300 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 disabled:bg-gray-100"
-            />
-
-            <button
-              type="submit"
-              className="h-12.5 rounded-[20px] w-[60%] bg-teal-500 hover:bg-teal-600 disabled:bg-teal-300 disabled:cursor-not-allowed flex justify-center items-center p-0 transition-colors duration-300"
-              disabled={!isFormValid || isLoading}
-            >
-              <h2 className="m-0 text-xl text-white">
-                {isLoading ? "Вход..." : "Войти"}
-              </h2>
-            </button>
-
-            {error && <p className="text-red-500">{error}</p>}
-          </form>
-        </div>
-      ) : (
-        <div className="border-2 border-gray-300 rounded-[30px] p-10">
-          {isLoading ? (
-            <p>Загрузка...</p>
-          ) : userData ? (
-            <div>
-              <h1 className="text-2xl font-bold mb-4">Данные пользователя</h1>
-              <p>Логин: {userData.login}</p>
-              <p>Пароль: {userData.password}</p>
-              <button
-                onClick={handleLogout}
-                className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-              >
-                Выйти
-              </button>
+    <div className="min-h-screen bg-base-200 px-4 py-8 sm:px-6 content-center">
+        <div className="mx-auto w-full max-w-md">
+          <div className="card border border-primary/20 bg-base-100 shadow-xl">
+            <div className="card-body">
+              {!token ? (
+                <>
+                  <div className="mb-4 text-center">
+                    <h1 className={`font-bold sm:text-4xl text-primary`}>Авторизация</h1>
+                  </div>
+                  <div className="flex flex-col gap-2.5 items-center">
+                    <fieldset className="fieldset border-primary border-2 rounded-box w-full p-4">
+                      <input type="email" className={`input w-full ${isLoading ? 'input-disabled' : ''}`} placeholder="Email" value={login} onChange={(e) => setLogin(e.target.value)} />
+                      <input type="password" className={`input w-full ${isLoading ? 'input-disabled' : ''}`} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                      <button className={`btn btn-primary mt-2 ${!isFormValid || isLoading ? 'btn-disabled' : ''}`} onClick={handleSubmit}>
+                        {isLoading ? "Вход..." : "Войти"}
+                      </button>
+                    </fieldset>
+                    {error && <div className="rounded-box bg-error/5 p-4 w-full"><p className="text-sm leading-relaxed text-warning"><p className="font-bold">Ошибка авторизации:</p>{error}</p></div>}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {isLoading ? (
+                    <p>Загрузка...</p>
+                  ) : userData ? (
+                    <div className="mb-4 text-center">
+                      <h1 className={`font-bold sm:text-3xl text-primary`}>Успешно авторизованы</h1>
+                    </div>
+                  ) : (
+                    <div className="rounded-box bg-error/5 p-4 w-full"><div className="text-sm font-semibold leading-relaxed text-warning"><p className="font-bold">Ошибка:</p>Не удалось загрузить данные пользователя.</div></div>
+                  )}
+                  <button onClick={handleLogout} className="btn btn-error mt-4 w-full">Выйти</button>
+                </>
+              )}
             </div>
-          ) : (
-            <p>Не удалось загрузить данные</p>
-          )}
+          </div>
         </div>
-      )}
     </div>
   );
 }
