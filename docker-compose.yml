@@ -13,16 +13,14 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-public"
 
-      # Service — уникальное имя
       - "traefik.http.services.frontend-auth.loadbalancer.server.port=3000"
 
-      # Middleware
       - "traefik.http.middlewares.frontend-auth-strip.stripprefix.prefixes=/auth"
 
-      # Router
-      - "traefik.http.routers.frontend-auth.rule=Host(`sesc-it-team.ru`) && PathPrefix(`/auth`)"
+      - "traefik.http.routers.frontend-auth.rule=Host(`sesc-it-team.ru`) && (Path(`/auth`) || PathPrefix(`/auth/`))"
       - "traefik.http.routers.frontend-auth.entrypoints=websecure"
       - "traefik.http.routers.frontend-auth.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.frontend-auth.priority=100"
       - "traefik.http.routers.frontend-auth.middlewares=frontend-auth-strip"
       - "traefik.http.routers.frontend-auth.service=frontend-auth"
 
