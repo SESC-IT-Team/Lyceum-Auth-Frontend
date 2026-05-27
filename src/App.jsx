@@ -69,13 +69,6 @@ export default function Auth() {
         if (refreshRes.ok) {
           const refreshData = await refreshRes.json();
           const newToken = refreshData.access_token;
-
-          Cookies.set("accessToken", newToken, {
-            expires: 7,
-            secure: true,
-            sameSite: "None",
-            path: "/",
-          });
           
           setToken(newToken);
           // После рефреша можно либо снова дернуть /me, либо сразу редиректнуть
@@ -114,12 +107,6 @@ export default function Auth() {
       }
 
       const data = await res.json();
-      Cookies.set("accessToken", data.access_token, {
-        expires: 7,
-        secure: true,
-        sameSite: "None",
-        path: "/",
-      });
       setToken(data.access_token);
       performRedirect();
     } catch (e) {
