@@ -17,7 +17,7 @@ services:
 
       - "traefik.http.middlewares.frontend-auth-strip.stripprefix.prefixes=/auth"
 
-      - "traefik.http.routers.frontend-auth.rule=Host(`sesc-it-team.ru`) && (Path(`/auth`) || PathPrefix(`/auth/`))"
+      - "traefik.http.routers.frontend-auth.rule=Host(`${DOMAIN}`) && (Path(`/auth`) || PathPrefix(`/auth/`))"
       - "traefik.http.routers.frontend-auth.entrypoints=websecure"
       - "traefik.http.routers.frontend-auth.tls.certresolver=letsencrypt"
       - "traefik.http.routers.frontend-auth.priority=100"
