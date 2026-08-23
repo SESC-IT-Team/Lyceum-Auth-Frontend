@@ -17,11 +17,10 @@ services:
 
       - "traefik.http.middlewares.frontend-auth-strip.stripprefix.prefixes=/auth"
 
-      - "traefik.http.routers.frontend-auth.rule=Host(`${DOMAIN}`) && (Path(`/auth`) || PathPrefix(`/auth/`))"
+      - "traefik.http.routers.frontend-auth.rule=Host(`${APP_DOMAIN:-${DOMAIN}}`)"
       - "traefik.http.routers.frontend-auth.entrypoints=websecure"
       - "traefik.http.routers.frontend-auth.tls.certresolver=letsencrypt"
       - "traefik.http.routers.frontend-auth.priority=100"
-      - "traefik.http.routers.frontend-auth.middlewares=frontend-auth-strip"
       - "traefik.http.routers.frontend-auth.service=frontend-auth"
 
 networks:

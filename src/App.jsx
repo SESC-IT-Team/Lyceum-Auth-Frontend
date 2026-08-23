@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 
-const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL;
+const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || (
+  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:8000'
+    : `${window.location.protocol}//api.${window.location.hostname}`
+);
 
 export default function Auth() {
   const [login, setLogin] = useState("");
